@@ -18,5 +18,3 @@ def load_data_facial_keypoints(path, testing=False):
         y = None
 
     return X, y
-
-load_data_facial_keypoints('../data/training.csv')
