@@ -11,7 +11,7 @@ def load_data_facial_keypoints(path):
     df['Image'] = df['Image'].apply(lambda im: np.fromstring(im, sep=' '))
 
     # drop all missing values
-    df.dropna()
+    df = df.dropna()
 
     # get all the images and their keypoint labels
     X = np.vstack(df['Image'].values).astype(np.float32).reshape((-1, 96, 96, 1))
@@ -23,10 +23,8 @@ def load_data_facial_keypoints(path):
 
     # split the data into 80% training 20% testing
     train_size = int(len(X)*.8)
-    X_train,y_train = X[:train_size], y[:train_size]
+    X_train,y_train = X, y
     X_test,y_test = X[train_size:], y[:train_size:]
 
-    return X_train, X_test, y_train, y_test
-
-load_data_facial_keypoints('../data/training.csv')
+    return X_train, y_train, X_test, y_test
 
