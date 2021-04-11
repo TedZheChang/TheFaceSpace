@@ -1,20 +1,32 @@
 import pandas
 import numpy as np
+import matplotlib.pyplot as plt
 
-def load_data_facial_keypoints(path, testing=False):
+
+def load_data_facial_keypoints(path):
+    # load data into dataframe
     df = pandas.read_csv(path)
+
+    # turn images in numpy arrays
     df['Image'] = df['Image'].apply(lambda im: np.fromstring(im, sep=' '))
+
+    # drop all missing values
     df.dropna()
 
-    X = np.vstack(df['Image'].values) / 255.
-    X = X.astype(np.float32)
-    X = X.reshape(-1, 96, 96, 1)
+    # get all the images and their keypoint labels
+    X = np.vstack(df['Image'].values).astype(np.float32).reshape((-1, 96, 96, 1))
+    y = df[df.columns[:-1]].values.astype(np.float32)
 
-    if not testing:
-        y = df[df.columns[:-1]].values
-        y = (y - 48) / 48
-        y = y.astype(np.float32)
-    else:
-        y = None
+    # normalize the datapoints
+    X = X / 255.
+    y = (y - 48) / 48
 
-    return X, y
+    # split the data into 80% training 20% testing
+    train_size = int(len(X)*.8)
+    X_train,y_train = X[:train_size], y[:train_size]
+    X_test,y_test = X[train_size:], y[:train_size:]
+
+    return X_train, X_test, y_train, y_test
+
+load_data_facial_keypoints('../data/training.csv')
+
