@@ -32,7 +32,7 @@ def facial_keypoints_model():
     model.add(Dense(64, activation='relu'))
     model.add(Dense(128, activation='relu'))
     model.add(Dense(256, activation='relu'))
-    model.add(Dense(64, activation='relu'))
+    model.add(Dense(512, activation='relu'))
     
     # there are 30 facial keypoints
     model.add(Dense(30))
