@@ -42,11 +42,5 @@ def facial_keypoints_model():
 def train_facial_keypoints(X,y):
     model = facial_keypoints_model()
     model.compile(loss='mean_squared_error', optimizer='adam',metrics=["accuracy"])
-    model.fit(X, y, epochs=100, batch_size=100, verbose=1, validation_split=0.2)
+    model.fit(X, y, epochs=2, batch_size=100, verbose=1, validation_split=0.2)
     model.save("facial_keypoints_model.h5")
-    
-
-
-
-
-    
