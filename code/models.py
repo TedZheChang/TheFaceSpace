@@ -20,6 +20,11 @@ def facial_keypoints_model():
     model.add(MaxPool2D(pool_size=(2, 2)))
     model.add(Dropout(.2))
 
+    # fourth conv layer
+    model.add(Conv2D(30, (3, 3), activation='relu'))
+    model.add(MaxPool2D(pool_size=(2, 2)))
+    model.add(Dropout(.3))
+
     # flatten
     model.add(Flatten())
 
@@ -27,6 +32,7 @@ def facial_keypoints_model():
     model.add(Dense(64, activation='relu'))
     model.add(Dense(128, activation='relu'))
     model.add(Dense(256, activation='relu'))
+    model.add(Dense(64, activation='relu'))
     
     # there are 30 facial keypoints
     model.add(Dense(30))
