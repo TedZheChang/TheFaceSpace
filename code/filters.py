@@ -5,34 +5,36 @@ from skimage.transform import resize
 import matplotlib.pyplot as plt
 import cv2 
 
+def apply_filters(image, filters, keypoints):
+    filtered_image = image
+    # filter each portion of the face separately 
+    filtered_image = apply_eyes_filter(filtered_image, filters[0], np.take(keypoints, [2,3,0], axis=0), np.take(keypoints, [4,5,1], axis=0))
+    filtered_image = apply_mouth_filter(filtered_image, filters[1], np.take(keypoints, [11,12,13,14], axis=0))
+    filtered_image = apply_nose_filter(filtered_image, filters[2], keypoints[10])
+    return filtered_image
+    
+def apply_eyes_filter(image, filter_image, left_eye_coords, right_eye_coords):
+    # eye coords are as follow: [(left_corner_y, left_corner_x), (right_corner_y, right_corner_x), (center_y, center_x)]
+    return image
 
-def apply_red_circle(image, circle, model):
-    # check for 4-channel image & resize to appropriate size
-    print(circle)
-    if len(circle.shape) > 2 and circle.shape[2] == 4:
-        circle = cv2.cvtColor(circle, cv2.COLOR_BGRA2BGR)
-    circle = resize(circle, (10, 10, 3))
-    image = np.expand_dims(image, axis=0)
-    colored_img = np.squeeze(cv2.merge((image, image, image)))
-    # print(colored_img.shape)
-    # colored_img = cv2.cvtColor(colored_img, cv2.COLOR_BGR2GRA
-    output = model.predict(image)
-    nose_tip_x = int(48*output[0, 20]+48)
-    nose_tip_y = int(48*output[0, 21]+48)
-    colored_img[nose_tip_y, nose_tip_x, :] = [255, 0, 0]
-    plt.imshow(colored_img)
-    plt.show()
+def apply_mouth_filter(image, filter_image, left_mouth_coords):
+    # mouth coords are as follow: [(left_corner_y, left_corner_x), (right_corner_y, right_corner_x), (upper_lip_center_y, upper_lip_ceter_x),(lower_lip_center_y, lower_lip_ceter_x)]
+    return image
 
-    for x in range(0, 10):
-        for y in range(0, 10):
-            pixel_g = circle[y][x][1]
-            pixel_b = circle[y][x][2]
-            if pixel_g<0.5 and pixel_b<0.5: # red part
-                # print('applying filter at ', x, " and ", y)
-                colored_img[nose_tip_y-5+y, nose_tip_x-5+x, :] = circle[y, x, :]
+def apply_nose_filter(image, filter_image, nose_coords):
+    # nose coords are as follow: [(center_y, center_x)]
+    filter_image = resize(filter_image, (40, 40, 3)) * 255
+    filtered_image = image
+    for y in range(0, filter_image.shape[0]):
+        for x in range(0, filter_image.shape[1]):
+            b,g,r = filter_image[y][x][0],filter_image[y][x][1],filter_image[y][x][2]
+            if not approximately_white(b,g,r):
+                filtered_image[int(nose_coords[0] - filter_image.shape[0]/2 + y), int(nose_coords[1] - filter_image.shape[1]/2 + x), :] = filter_image[y, x, :]
+    return filtered_image
 
-    plt.imshow(colored_img)
-    plt.show()
+def approximately_white(b,g,r):
+    return b > 200 and g > 200 and r > 200
+
 
     
 

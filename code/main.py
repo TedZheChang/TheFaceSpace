@@ -3,6 +3,8 @@ from models import *
 from preprocessing import *
 from filters import *
 import numpy as np
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 import tensorflow as tf
 import argparse
 import matplotlib.pyplot as plt
@@ -20,6 +22,12 @@ def parse_args():
     )
 
     parser.add_argument(
+        '--train_expression',
+        action='store_true',
+        help='''Decide whether to train model before running'''
+    )
+
+    parser.add_argument(
         '--keypoint_data',
         required= False,
         default= '../data/training.csv',
@@ -29,7 +37,7 @@ def parse_args():
     parser.add_argument(
         '--filter',
         required= False,
-        default= '../data/red_circle.png',
+        default= None,
         help='''Filter image file path'''
     )
 
@@ -42,35 +50,57 @@ def paint_cross(x, y, img):
     pass
 
 if __name__ == "__main__":
+    # parse arguments from cli for selected options
     ARGS = parse_args()
-    X_train, y_train, X_test, y_test = load_data_facial_keypoints('../data/training.csv')
-    if ARGS.filter is not None:
-        img_filter = img_as_float32(io.imread(ARGS.filter))
-    else:
-        img_filter = img_as_float32(io.imread('../data/red_circle.png'))
+    # load cv2 face classifier to help find faces to put filters on
+    face_classifier = cv2.CascadeClassifier('../data/haar_cascade.xml')
 
+    # read which filter to use, default to red nose filter
+    if ARGS.filter is not None:
+        filters = img_as_float32(io.imread(ARGS.filter))
+    else:
+        filters = [None, None, cv2.imread('../data/clown-nose.png', cv2.IMREAD_UNCHANGED)]
+
+    # only train the model if specificed
     if ARGS.train_keypoints:
+        # load in training data
+        X_train, y_train = load_data_facial_keypoints('../data/training.csv')
+        # train the model
         train_facial_keypoints(X_train, y_train)
 
+    # load in the model
     model = tf.keras.models.load_model('facial_keypoints_model.h5')
-    keypoints = model.predict(X_train[0:5])
-    testimgs = np.squeeze(X_train[0:5])
 
-    for i in range(5):
-        for j in range(0, 30, 2):
-            paint_cross(keypoints[i][j], keypoints[i][j+1], testimgs[i])
-    for i in range(5):
-        plt.imshow(testimgs[i])
-        plt.show()
-        apply_red_circle(X_train[i], img_filter, model)
+    # use cv2 to capture current video feed
     c = cv2.VideoCapture(0)
 
     while True:
+        # get the frame and flip for aesthetic purposes
         (_, frame) = c.read()
         frame = cv2.flip(frame,1)
+        # grayscale version because that's what the model is trained on
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = face_classifier.detectMultiScale(gray)
+        
+        for f in faces:
+            # get the x,y coordinates and height and width of detected face
+            x, y, w, h = f[0], f[1], f[2], f[3]
+            # retrieve face from the fram
+            face = gray[y:y+h, x:x+h]
+            # normalize and resize
+            face = np.reshape(cv2.resize(face/255, (96,96)), (1,96,96,1))
+            # predict keypoints and rescale
+            p = model.predict(face) * 48 + 48
+            # map keypoints to coordinates
+            keypoints = []
+            for i in range(0,30,2):
+                keypoints.append((p[0][i+1],p[0][i]))
+            # apply filters
+            colored_face = cv2.resize(frame[y:y+h, x:x+h], (96,96))
+            filtered_face = apply_filters(colored_face, filters, keypoints)
+            frame[y:y+h, x:x+h] = cv2.resize(filtered_face, (h,w))
 
-        cv2.imshow("test", frame)
+        cv2.imshow("Face Space", frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break

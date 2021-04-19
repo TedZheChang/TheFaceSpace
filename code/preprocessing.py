@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def load_data_facial_keypoints(path):
+def load_data_facial_keypoints(path, testing=False):
     # load data into dataframe
     df = pandas.read_csv(path)
 
@@ -21,10 +21,12 @@ def load_data_facial_keypoints(path):
     X = X / 255.
     y = (y - 48) / 48
 
-    # split the data into 80% training 20% testing
-    train_size = int(len(X)*.8)
-    X_train,y_train = X, y
-    X_test,y_test = X[train_size:], y[:train_size:]
-
-    return X_train, y_train, X_test, y_test
+    if testing:
+        # split the data into 80% training 20% testing
+        train_size = int(len(X)*.8)
+        X_train,y_train = X[:train_size], y[:train_size]
+        X_test,y_test = X[train_size:], y[:train_size:]
+        return X_train, y_train, X_test, y_test
+    else:
+        return X,y
 
