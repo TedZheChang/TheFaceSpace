@@ -8,7 +8,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 import argparse
 import matplotlib.pyplot as plt
-from skimage import io, img_as_float32
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -17,12 +16,6 @@ def parse_args():
 
     parser.add_argument(
         '--train_keypoints',
-        action='store_true',
-        help='''Decide whether to train model before running'''
-    )
-
-    parser.add_argument(
-        '--train_expression',
         action='store_true',
         help='''Decide whether to train model before running'''
     )
