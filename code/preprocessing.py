@@ -1,6 +1,10 @@
 import pandas
 import numpy as np
 import matplotlib.pyplot as plt
+import cv2
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+import tensorflow as tf
 
 
 def load_data_facial_keypoints(path, testing=False):
@@ -29,4 +33,26 @@ def load_data_facial_keypoints(path, testing=False):
         return X_train, y_train, X_test, y_test
     else:
         return X,y
+
+def load_data_facial_expressions(path):
+    # load data into pandas
+    df = pandas.read_csv(path)
+
+    # turn pixels in np arrays
+    df['pixels'] = df['pixels'].apply(lambda im: np.fromstring(im, sep=' '))
+
+    # drop undefined rows
+    df = df.dropna()
+
+    # resize pixels to be more consisten with facial landmark model
+    df['pixels'] = df['pixels'].apply(lambda x: cv2.resize(x, (96,96)))
+
+    # normalize pixels and stack
+    X = np.vstack(df['pixels'].values).astype(np.float32).reshape((-1, 96, 96, 1))/255
+    y = np.array(df['emotion'])
+
+    return X,y
+    
+
+load_data_facial_expressions('../data/facial_expression_data.csv')
 

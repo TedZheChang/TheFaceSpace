@@ -28,6 +28,12 @@ def parse_args():
     )
 
     parser.add_argument(
+        '--train_expression',
+        action='store_true',
+        help='''Decide whether to train model before running'''
+    )
+
+    parser.add_argument(
         '--keypoint_data',
         required= False,
         default= '../data/training.csv',
@@ -64,12 +70,19 @@ if __name__ == "__main__":
     # only train the model if specificed
     if ARGS.train_keypoints:
         # load in training data
-        X_train, y_train = load_data_facial_keypoints('../data/training.csv')
+        X_train, y_train = load_data_facial_keypoints('../data/facial_keypoints_data.csv')
         # train the model
         train_facial_keypoints(X_train, y_train)
 
-    # load in the model
-    model = tf.keras.models.load_model('facial_keypoints_model.h5')
+    if ARGS.train_expression:
+        # load in training data
+        X_train,y_train = load_data_facial_expressions('../data/facial_expression_data.csv')
+        # train the model
+        train_facial_expressions(X_train, y_train)
+
+    # load in the models
+    keypoints_model = tf.keras.models.load_model('facial_keypoints_model.h5')
+    expressions_model = tf.keras.models.load_model('facial_expressions_model.h5')
 
     # use cv2 to capture current video feed
     c = cv2.VideoCapture(0)
@@ -90,7 +103,7 @@ if __name__ == "__main__":
             # normalize and resize
             face = np.reshape(cv2.resize(face/255, (96,96)), (1,96,96,1))
             # predict keypoints and rescale
-            p = model.predict(face) * 48 + 48
+            p = keypoints_model.predict(face) * 48 + 48
             # map keypoints to coordinates
             keypoints = []
             for i in range(0,30,2):

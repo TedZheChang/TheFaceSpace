@@ -52,3 +52,5 @@ docs/_build/
 # Our Stuff
 data/**.csv
 **/**.h5
+**/testing.py/**
+**/**.npy
