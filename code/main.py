@@ -80,7 +80,7 @@ if __name__ == "__main__":
     if ARGS.eye_filter is not None:
         eye_filter = cv2.imread(ARGS.eye_filter, -1)
     else:
-        eye_filters = None
+        eye_filter = None
 
     # read which mouth filter to use, default to None
     if ARGS.mouth_filter is not None:
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     # only train the model if specificed
     if ARGS.train_keypoints:
         # load in training data
-        X_train, y_train = load_data_facial_keypoints('../data/training.csv')
+        X_train, y_train = load_data_facial_keypoints('../data/facial_keypoints_data.csv')
         # train the model
         train_facial_keypoints(X_train, y_train)
 
@@ -112,7 +112,7 @@ if __name__ == "__main__":
     # expressions_model = tf.keras.models.load_model('facial_expressions_model.h5')
 
 # always true for some reason
-    if ARGS.cv2:
+    if False:
         # use cv2 to capture current video feed
         c = cv2.VideoCapture(0)
 
@@ -139,7 +139,7 @@ if __name__ == "__main__":
                     keypoints.append((p[0][i+1],p[0][i]))
                 # apply filters
                 colored_face = cv2.resize(frame[y:y+h, x:x+h], (96,96))
-                filtered_face = apply_filters(colored_face, filters, keypoints)
+                filtered_face = apply_filters(colored_face, eye_filter, nose_filter, mouth_filter, keypoints)
                 frame[y:y+h, x:x+h] = cv2.resize(filtered_face, (h,w))
 
             cv2.imshow("Face Space", frame)
@@ -179,7 +179,7 @@ if __name__ == "__main__":
             # black = np.zeros(3)
             # for point in keypoints:
             #     c_face[int(point[0])][int(point[1])] = black
-            filtered_face = apply_filters(c_face, filters, keypoints)
+            filtered_face = apply_filters(c_face, eye_filter, nose_filter, mouth_filter, keypoints)
             plt.imshow(filtered_face[:, :, 0])
             plt.show()
 
