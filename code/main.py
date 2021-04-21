@@ -59,7 +59,7 @@ def parse_args():
     parser.add_argument(
         '--cv2',
         required=False,
-        default=True,
+        default='True',
         help='''Whether to use cv2 library'''
     )
 
@@ -112,7 +112,7 @@ if __name__ == "__main__":
     # expressions_model = tf.keras.models.load_model('facial_expressions_model.h5')
 
 # always true for some reason
-    if False:
+    if ARGS.cv2 == 'True':
         # use cv2 to capture current video feed
         c = cv2.VideoCapture(0)
 
