@@ -8,6 +8,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 import argparse
 import matplotlib.pyplot as plt
+from skimage import io, img_as_float32
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -17,12 +18,14 @@ def parse_args():
     parser.add_argument(
         '--train_keypoints',
         action='store_true',
+        
         help='''Decide whether to train model before running'''
     )
 
     parser.add_argument(
         '--train_expression',
-        action='store_true',
+        # action='store_true',
+        default='False',
         help='''Decide whether to train model before running'''
     )
 
@@ -34,10 +37,22 @@ def parse_args():
     )
 
     parser.add_argument(
-        '--filter',
+        '--eye_filter',
         required= False,
         default= None,
-        help='''Filter image file path'''
+        help='''Eyes filter image file path'''
+    )
+    parser.add_argument(
+        '--mouth_filter',
+        required= False,
+        default= None,
+        help='''Mouth filter image file path'''
+    )
+    parser.add_argument(
+        '--nose_filter',
+        required= False,
+        default= None,
+        help='''Nose filter image file path'''
     )
 
     return parser.parse_args()
@@ -54,28 +69,40 @@ if __name__ == "__main__":
     # load cv2 face classifier to help find faces to put filters on
     face_classifier = cv2.CascadeClassifier('../data/haar_cascade.xml')
 
-    # read which filter to use, default to red nose filter
-    if ARGS.filter is not None:
-        filters = img_as_float32(io.imread(ARGS.filter))
+    # read which eye filter to use, default to None
+    if ARGS.eye_filter is not None:
+        eye_filter = cv2.imread(ARGS.eye_filter, -1)
     else:
-        filters = [None, None, cv2.imread('../data/clown-nose.png', cv2.IMREAD_UNCHANGED)]
+        eye_filters = None
 
+    # read which mouth filter to use, default to None
+    if ARGS.mouth_filter is not None:
+        mouth_filter = cv2.imread(ARGS.mouth_filter, -1)
+    else:
+        mouth_filter = None
+    
+    # read which filter to use, default to None
+    if ARGS.nose_filter is not None:
+        nose_filter = cv2.imread(ARGS.nose_filter, -1)
+    else:
+        nose_filter = None
+    
     # only train the model if specificed
     if ARGS.train_keypoints:
         # load in training data
-        X_train, y_train = load_data_facial_keypoints('../data/facial_keypoints_data.csv')
+        X_train, y_train = load_data_facial_keypoints('../data/training.csv')
         # train the model
         train_facial_keypoints(X_train, y_train)
 
-    if ARGS.train_expression:
-        # load in training data
-        X_train,y_train = load_data_facial_expressions('../data/facial_expression_data.csv')
-        # train the model
-        train_facial_expressions(X_train, y_train)
+    # if ARGS.train_expression:
+    #     # load in training data
+    #     X_train,y_train = load_data_facial_expressions('../data/facial_expression_data.csv')
+    #     # train the model
+    #     train_facial_expressions(X_train, y_train)
 
     # load in the models
     keypoints_model = tf.keras.models.load_model('facial_keypoints_model.h5')
-    expressions_model = tf.keras.models.load_model('facial_expressions_model.h5')
+    # expressions_model = tf.keras.models.load_model('facial_expressions_model.h5')
 
     # use cv2 to capture current video feed
     c = cv2.VideoCapture(0)
@@ -92,7 +119,7 @@ if __name__ == "__main__":
             # get the x,y coordinates and height and width of detected face
             x, y, w, h = f[0], f[1], f[2], f[3]
             # retrieve face from the fram
-            face = gray[y:y+h, x:x+h]
+            face = gray[y:y+h, x:x+w]
             # normalize and resize
             face = np.reshape(cv2.resize(face/255, (96,96)), (1,96,96,1))
             # predict keypoints and rescale
@@ -103,7 +130,7 @@ if __name__ == "__main__":
                 keypoints.append((p[0][i+1],p[0][i]))
             # apply filters
             colored_face = cv2.resize(frame[y:y+h, x:x+h], (96,96))
-            filtered_face = apply_filters(colored_face, filters, keypoints)
+            filtered_face = apply_filters(colored_face, eye_filter, nose_filter, mouth_filter, keypoints)
             frame[y:y+h, x:x+h] = cv2.resize(filtered_face, (h,w))
 
         cv2.imshow("Face Space", frame)

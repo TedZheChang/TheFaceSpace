@@ -44,7 +44,7 @@ def load_data_facial_expressions(path):
     # drop undefined rows
     df = df.dropna()
 
-    # resize pixels to be more consisten with facial landmark model
+    # resize pixels to be more consistent with facial landmark model
     df['pixels'] = df['pixels'].apply(lambda x: cv2.resize(x, (96,96)))
 
     # normalize pixels and stack
@@ -54,5 +54,5 @@ def load_data_facial_expressions(path):
     return X,y
     
 
-load_data_facial_expressions('../data/facial_expression_data.csv')
+# load_data_facial_expressions('../data/facial_expression_data.csv')
 
