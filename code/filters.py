@@ -61,7 +61,6 @@ def apply_mouth_filter(image, filter_image, mouth_coords):
     for y in range(0, filter_image.shape[0]):
         for x in range(0, filter_image.shape[1]):
             r,b,g = filter_image[y][x][0],filter_image[y][x][1],filter_image[y][x][2]
-            print(r, b, g)
             if not approximately_black(b,g,r):
                 x_loc = int(mouth_center_x - filter_image.shape[1]/2 + x)
                 y_loc = int(mouth_center_y - filter_image.shape[0]/2 + y)

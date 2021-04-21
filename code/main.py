@@ -19,14 +19,12 @@ def parse_args():
     parser.add_argument(
         '--train_keypoints',
         action='store_true',
-        
         help='''Decide whether to train model before running'''
     )
 
     parser.add_argument(
         '--train_expression',
-        # action='store_true',
-        default='False',
+        action='store_true',
         help='''Decide whether to train model before running'''
     )
 
@@ -101,11 +99,11 @@ if __name__ == "__main__":
         # train the model
         train_facial_keypoints(X_train, y_train)
 
-    # if ARGS.train_expression:
-    #     # load in training data
-    #     X_train,y_train = load_data_facial_expressions('../data/facial_expression_data.csv')
-    #     # train the model
-    #     train_facial_expressions(X_train, y_train)
+    if ARGS.train_expression:
+        # load in training data
+        X_train,y_train = load_data_facial_expressions('../data/facial_expression_data.csv')
+        # train the model
+        train_facial_expressions(X_train, y_train)
 
     # load in the models
     keypoints_model = tf.keras.models.load_model('facial_keypoints_model.h5')
@@ -147,9 +145,7 @@ if __name__ == "__main__":
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
     else:
-        print("1")
         X, Y = load_raw_keypoints('../data/facial_keypoints_data.csv')
-        print("2")
         spot = np.zeros((1, 1, 3))
         for k in range(len(X)):
             frame = X[k]
