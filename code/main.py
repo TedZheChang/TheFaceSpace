@@ -58,7 +58,9 @@ if __name__ == "__main__":
     if ARGS.filter is not None:
         filters = img_as_float32(io.imread(ARGS.filter))
     else:
-        filters = [None, None, cv2.imread('../data/clown-nose.png', cv2.IMREAD_UNCHANGED)]
+        filters = [cv2.imread('../data/googly-eye.png', cv2.IMREAD_UNCHANGED),
+                   None,
+                   cv2.imread('../data/clown-nose.png', cv2.IMREAD_UNCHANGED)]
 
     # only train the model if specificed
     if ARGS.train_keypoints:
@@ -78,7 +80,7 @@ if __name__ == "__main__":
     expressions_model = tf.keras.models.load_model('facial_expressions_model.h5')
 
 # always true for some reason
-    if ARGS.cv2:
+    if False:
         # use cv2 to capture current video feed
         c = cv2.VideoCapture(0)
 
@@ -116,28 +118,34 @@ if __name__ == "__main__":
         print("1")
         X, Y = load_raw_keypoints('../data/facial_keypoints_data.csv')
         print("2")
-        frame = X[0]
-        gray = frame
-        f = [0, 0, 96, 96]
-        x, y, w, h = f[0], f[1], f[2], f[3]
-        face = gray[y:y + h, x:x + h]
-        face = np.reshape(face, (1, 96, 96, 1))
-        p = keypoints_model.predict(face/255) * 48 + 48
-        keypoints = []
-        for i in range(0, 30, 2):
-            keypoints.append((p[0][i + 1], p[0][i]))
-        # apply filters
-        colored_face = cv2.resize(frame[y:y + h, x:x + h], (96, 96))
-        colored_face = np.squeeze(colored_face)
-        c_face = np.zeros((len(colored_face), len(colored_face[0]), 3))
-        for i in range(len(colored_face)):
-            for j in range(len(colored_face[0])):
-                c_face[i][j][0] = colored_face[i][j]
-                c_face[i][j][1] = colored_face[i][j]
-                c_face[i][j][2] = colored_face[i][j]
-        filtered_face = apply_filters(c_face, filters, keypoints)
-        plt.imshow(filtered_face[:, :, 0])
-        plt.show()
+        spot = np.zeros((1, 1, 3))
+        for k in range(len(X)):
+            frame = X[k]
+            gray = frame
+            f = [0, 0, 96, 96]
+            x, y, w, h = f[0], f[1], f[2], f[3]
+            face = gray[y:y + h, x:x + h]
+            face = np.reshape(face, (1, 96, 96, 1))
+            p = keypoints_model.predict(face/255) * 48 + 48
+            keypoints = []
+            for i in range(0, 30, 2):
+                keypoints.append((p[0][i + 1], p[0][i]))
+            # apply filters
+            colored_face = cv2.resize(frame[y:y + h, x:x + h], (96, 96))
+            colored_face = np.squeeze(colored_face)
+            c_face = np.zeros((len(colored_face), len(colored_face[0]), 3))
+            for i in range(len(colored_face)):
+                for j in range(len(colored_face[0])):
+                    c_face[i][j][0] = colored_face[i][j]
+                    c_face[i][j][1] = colored_face[i][j]
+                    c_face[i][j][2] = colored_face[i][j]
+            # filters = [spot, spot, spot]
+            # black = np.zeros(3)
+            # for point in keypoints:
+            #     c_face[int(point[0])][int(point[1])] = black
+            filtered_face = apply_filters(c_face, filters, keypoints)
+            plt.imshow(filtered_face[:, :, 0])
+            plt.show()
 
 
 
