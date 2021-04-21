@@ -4,12 +4,11 @@ from preprocessing import *
 from filters import *
 import numpy as np
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+# os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 import tensorflow as tf
 import argparse
 import matplotlib.pyplot as plt
-from skimage import io, img_as_float32
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -78,6 +77,7 @@ if __name__ == "__main__":
     keypoints_model = tf.keras.models.load_model('facial_keypoints_model.h5')
     expressions_model = tf.keras.models.load_model('facial_expressions_model.h5')
 
+# always true for some reason
     if ARGS.cv2:
         # use cv2 to capture current video feed
         c = cv2.VideoCapture(0)
