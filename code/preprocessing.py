@@ -53,6 +53,21 @@ def load_data_facial_expressions(path):
 
     return X,y
     
+def load_raw_keypoints(path):
+    # load data into dataframe
+    df = pandas.read_csv(path)
+
+    # turn images in numpy arrays
+    df['Image'] = df['Image'].apply(lambda im: np.fromstring(im, sep=' '))
+
+    # drop all missing values
+    df = df.dropna()
+
+    # get all the images and their keypoint labels
+    X = np.vstack(df['Image'].values).astype(np.float32).reshape((-1, 96, 96, 1))
+    y = df[df.columns[:-1]].values.astype(np.float32)
+
+    return X, y
 
 load_data_facial_expressions('../data/facial_expression_data.csv')
 

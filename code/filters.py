@@ -25,6 +25,9 @@ def apply_nose_filter(image, filter_image, nose_coords):
     # nose coords are as follow: [(center_y, center_x)]
     filter_image = resize(filter_image, (40, 40, 3)) * 255
     filtered_image = image
+    print(image.shape)
+    print(filter_image.shape)
+    print(nose_coords)
     for y in range(0, filter_image.shape[0]):
         for x in range(0, filter_image.shape[1]):
             b,g,r = filter_image[y][x][0],filter_image[y][x][1],filter_image[y][x][2]

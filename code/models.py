@@ -8,9 +8,9 @@ def facial_keypoints_model():
     model = Sequential()
 
     # first conv layer
-    model.add()
     model.add(Conv2D(32, (5, 5), input_shape=(96,96,1), activation='relu'))
     model.add(MaxPool2D(pool_size=(2, 2)))
+    model.add(Dropout(.2))
 
     # second conv layer
     model.add(Conv2D(64, (3, 3), activation='relu'))
