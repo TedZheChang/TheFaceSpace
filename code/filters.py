@@ -16,8 +16,8 @@ def apply_filters(image, filters, keypoints):
     return filtered_image
 
 # Applies the given filter image to the point on the image
-def apply_filter_to_point(image, filter_image, point):
-    filter_image = resize(filter_image, (40, 40, 3)) * 255
+def apply_filter_to_point(image, filter_image, point, scale):
+    filter_image = resize(filter_image, (int(40*scale), int(40*scale), 3)) * 255
     filtered_image = image
     for y in range(0, filter_image.shape[0]):
         for x in range(0, filter_image.shape[1]):
@@ -29,8 +29,10 @@ def apply_filter_to_point(image, filter_image, point):
 
 def apply_eyes_filter(image, filter_image, left_eye_coords, right_eye_coords):
     # eye coords are as follow: [(left_corner_y, left_corner_x), (right_corner_y, right_corner_x), (center_y, center_x)]
-    image = apply_filter_to_point(image, filter_image, (left_eye_coords[0] + left_eye_coords[1])/2)
-    filtered_image = apply_filter_to_point(image, filter_image, (right_eye_coords[2] + right_eye_coords[2])/2)
+    scale = np.sqrt(np.power(right_eye_coords[0][0] - right_eye_coords[0][1], 2) +
+                    np.power(right_eye_coords[1][0] - right_eye_coords[1][1], 2))/20
+    image = apply_filter_to_point(image, filter_image, (left_eye_coords[0] + left_eye_coords[1])/2, scale)
+    filtered_image = apply_filter_to_point(image, filter_image, (right_eye_coords[2] + right_eye_coords[2])/2, scale)
     return filtered_image
 
 
@@ -41,7 +43,7 @@ def apply_mouth_filter(image, filter_image, left_mouth_coords):
 
 def apply_nose_filter(image, filter_image, nose_coords):
     # nose coords are as follow: [(center_y, center_x)]
-    filtered_image = apply_filter_to_point(image, filter_image, nose_coords)
+    filtered_image = apply_filter_to_point(image, filter_image, nose_coords, 1)
     return filtered_image
 
 
