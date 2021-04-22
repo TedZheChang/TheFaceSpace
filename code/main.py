@@ -107,7 +107,7 @@ if __name__ == "__main__":
 
     # load in the models
     keypoints_model = tf.keras.models.load_model('facial_keypoints_model.h5')
-    # expressions_model = tf.keras.models.load_model('facial_expressions_model.h5')
+    expressions_model = tf.keras.models.load_model('facial_expressions_model.h5')
 
 # always true for some reason
     if ARGS.cv2 == 'True':
@@ -135,7 +135,45 @@ if __name__ == "__main__":
                 keypoints = []
                 for i in range(0,30,2):
                     keypoints.append((p[0][i+1],p[0][i]))
-                # apply filters
+                # apply filters based on expressions 
+                expressions_prob = expressions_model.predict(face)
+                predictec_exp = np.argmax(expressions_prob)
+                
+                if predictec_exp==0: #angry
+                    eye_filter = cv2.imread('../data/angry_eyes.jpeg', -1)
+                    nose_filter = cv2.imread('../data/clown-nose.png', -1)
+                    mouth_filter = None
+                    print("Angry")
+                elif predictec_exp==1: #disgust
+                    eye_filter = None
+                    nose_filter = None
+                    mouth_filter = cv2.imread('../data/disgusted_mouth.jepg', -1)
+                    print('dusgust')
+                elif predictec_exp==2: #fear
+                    eye_filter = cv2.imread('../data/cute_eyes.jepg', -1)
+                    nose_filter = None
+                    mouth_filter = None
+                    print('fear')
+                elif predictec_exp==3: #happy
+                    eye_filter = cv2.imread('../data/sunglasses.jpg', -1)
+                    nose_filter = None
+                    mouth_filter = None
+                    print('happy')
+                elif predictec_exp==4: #sad
+                    eye_filter = cv2.imread('../data/sad_eyes.jpg', -1)
+                    nose_filter = None
+                    mouth_filter = None
+                    print('sad')
+                elif predictec_exp==5: #surprise
+                    eye_filter = None
+                    nose_filter = None
+                    mouth_filter = cv2.imread('../data/surprised_mouth.png', -1)
+                    print('surprise')
+                else: #neutral
+                    eye_filter = None 
+                    nose_filter = cv2.imread('../data/pig_nose.png', -1)
+                    mouth_filter = None
+                    print('neutral')
                 colored_face = cv2.resize(frame[y:y+h, x:x+h], (96,96))
                 filtered_face = apply_filters(colored_face, eye_filter, nose_filter, mouth_filter, keypoints)
                 frame[y:y+h, x:x+h] = cv2.resize(filtered_face, (h,w))

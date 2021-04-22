@@ -50,8 +50,9 @@ def load_data_facial_expressions(path):
     # normalize pixels and stack
     X = np.vstack(df['pixels'].values).astype(np.float32).reshape((-1, 96, 96, 1))/255
     y = np.array(df['emotion'])
-
-    return X,y
+    print('x shape = ', X.shape)
+    print('y shape = ', y.shape)
+    return X[0:2000,:,:,:],y[0:2000]
     
 def load_raw_keypoints(path):
     # load data into dataframe
