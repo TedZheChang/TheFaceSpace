@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from tensorflow.keras.models import Sequential, Model
+from tensorflow.keras.models import Sequential, Model, load_model
 from tensorflow.keras.layers import Input, Conv2D, MaxPool2D, Dropout, Flatten, Dense, BatchNormalization, Concatenate
 
 
@@ -67,20 +67,20 @@ def facial_expression_model():
     model.add(Dense(4096, activation='relu'))
     model.add(Dense(1024, activation='relu'))
     model.add(Dense(128, activation='relu'))
-
     model.add(Dense(7, activation='softmax'))
 
     return model
 
 def train_facial_keypoints(X,y):
-    model = facial_keypoints_model()
+    model = load_model("facial_keypoints_model.h5")
     model.compile(loss='mean_squared_error', optimizer='adam',metrics=['accuracy'])
-    model.fit(X, y, epochs=20, batch_size=100, verbose=1, validation_split=0.2)
+    model.fit(X, y, epochs=50, batch_size=100, verbose=1, validation_split=0.2)
     model.save("facial_keypoints_model.h5")
 
 def train_facial_expressions(X,y):
     model = facial_expression_model()
+    model.summary()
     model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-    model.fit(X, y, epochs=20, batch_size=100, verbose=1, validation_split=0.2)
-    model.save("facial_expressions_model.h5")
+    model.fit(X, y, epochs=50, batch_size=100, verbose=1, validation_split=0.2)
+    model.save("expressions_model.h5")
 

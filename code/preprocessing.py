@@ -52,7 +52,7 @@ def load_data_facial_expressions(path):
     y = np.array(df['emotion'])
     print('x shape = ', X.shape)
     print('y shape = ', y.shape)
-    return X[0:2000,:,:,:],y[0:2000]
+    return X, y
     
 def load_raw_keypoints(path):
     # load data into dataframe
@@ -70,5 +70,4 @@ def load_raw_keypoints(path):
 
     return X, y
 
-# load_data_facial_expressions('../data/facial_expression_data.csv')
 

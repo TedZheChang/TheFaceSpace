@@ -18,7 +18,8 @@ def parse_args():
 
     parser.add_argument(
         '--train_keypoints',
-        action='store_true',
+        default=True,
+        required=False,
         help='''Decide whether to train model before running'''
     )
 
@@ -35,24 +36,6 @@ def parse_args():
         help='''Path to data'''
     )
 
-    parser.add_argument(
-        '--eye_filter',
-        required= False,
-        default= None,
-        help='''Eyes filter image file path'''
-    )
-    parser.add_argument(
-        '--mouth_filter',
-        required= False,
-        default= None,
-        help='''Mouth filter image file path'''
-    )
-    parser.add_argument(
-        '--nose_filter',
-        required= False,
-        default= None,
-        help='''Nose filter image file path'''
-    )
 
     parser.add_argument(
         '--cv2',
@@ -73,24 +56,6 @@ if __name__ == "__main__":
     ARGS = parse_args()
     # load cv2 face classifier to help find faces to put filters on
     face_classifier = cv2.CascadeClassifier('../data/haar_cascade.xml')
-
-    # read which eye filter to use, default to None
-    if ARGS.eye_filter is not None:
-        eye_filter = cv2.imread(ARGS.eye_filter, -1)
-    else:
-        eye_filter = None
-
-    # read which mouth filter to use, default to None
-    if ARGS.mouth_filter is not None:
-        mouth_filter = cv2.imread(ARGS.mouth_filter, -1)
-    else:
-        mouth_filter = None
-    
-    # read which filter to use, default to None
-    if ARGS.nose_filter is not None:
-        nose_filter = cv2.imread(ARGS.nose_filter, -1)
-    else:
-        nose_filter = None
     
     # only train the model if specificed
     if ARGS.train_keypoints:
@@ -98,16 +63,15 @@ if __name__ == "__main__":
         X_train, y_train = load_data_facial_keypoints('../data/facial_keypoints_data.csv')
         # train the model
         train_facial_keypoints(X_train, y_train)
-
+    keypoints_model = tf.keras.models.load_model('facial_keypoints_model.h5')
+   
     if ARGS.train_expression:
         # load in training data
         X_train,y_train = load_data_facial_expressions('../data/facial_expression_data.csv')
         # train the model
         train_facial_expressions(X_train, y_train)
-
-    # load in the models
-    keypoints_model = tf.keras.models.load_model('facial_keypoints_model.h5')
-    expressions_model = tf.keras.models.load_model('facial_expressions_model.h5')
+    
+    expressions_model = tf.keras.models.load_model('expressions_model.h5')
 
 # always true for some reason
     if ARGS.cv2 == 'True':
@@ -143,37 +107,30 @@ if __name__ == "__main__":
                     eye_filter = cv2.imread('../data/angry_eyes.jpeg', -1)
                     nose_filter = cv2.imread('../data/clown-nose.png', -1)
                     mouth_filter = None
-                    print("Angry")
                 elif predictec_exp==1: #disgust
                     eye_filter = None
                     nose_filter = None
                     mouth_filter = cv2.imread('../data/disgusted_mouth.jepg', -1)
-                    print('dusgust')
                 elif predictec_exp==2: #fear
                     eye_filter = cv2.imread('../data/cute_eyes.jepg', -1)
                     nose_filter = None
                     mouth_filter = None
-                    print('fear')
                 elif predictec_exp==3: #happy
                     eye_filter = cv2.imread('../data/sunglasses.jpg', -1)
                     nose_filter = None
                     mouth_filter = None
-                    print('happy')
                 elif predictec_exp==4: #sad
-                    eye_filter = cv2.imread('../data/sad_eyes.jpg', -1)
+                    eye_filter = cv2.imread('../data/cute_eyes.png', -1)
                     nose_filter = None
                     mouth_filter = None
-                    print('sad')
                 elif predictec_exp==5: #surprise
                     eye_filter = None
                     nose_filter = None
                     mouth_filter = cv2.imread('../data/surprised_mouth.png', -1)
-                    print('surprise')
                 else: #neutral
                     eye_filter = None 
                     nose_filter = cv2.imread('../data/pig_nose.png', -1)
                     mouth_filter = None
-                    print('neutral')
                 colored_face = cv2.resize(frame[y:y+h, x:x+h], (96,96))
                 filtered_face = apply_filters(colored_face, eye_filter, nose_filter, mouth_filter, keypoints)
                 frame[y:y+h, x:x+h] = cv2.resize(filtered_face, (h,w))
@@ -209,10 +166,6 @@ if __name__ == "__main__":
                     c_face[i][j][0] = colored_face[i][j]
                     c_face[i][j][1] = colored_face[i][j]
                     c_face[i][j][2] = colored_face[i][j]
-            # filters = [spot, spot, spot]
-            # black = np.zeros(3)
-            # for point in keypoints:
-            #     c_face[int(point[0])][int(point[1])] = black
             filtered_face = apply_filters(c_face, eye_filter, nose_filter, mouth_filter, keypoints)
             plt.imshow(filtered_face[:, :, 0])
             plt.show()
