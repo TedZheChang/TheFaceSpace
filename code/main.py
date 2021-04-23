@@ -71,7 +71,7 @@ if __name__ == "__main__":
         # train the model
         train_facial_expressions(X_train, y_train)
     
-    expressions_model = tf.keras.models.load_model('expressions_model.h5')
+    expressions_model = tf.keras.models.load_model('facial_expressions_model.h5')
 
 # always true for some reason
     if ARGS.cv2 == 'True':

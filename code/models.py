@@ -72,7 +72,7 @@ def facial_expression_model():
     return model
 
 def train_facial_keypoints(X,y):
-    model = load_model("facial_keypoints_model.h5")
+    model = facial_keypoints_model()
     model.compile(loss='mean_squared_error', optimizer='adam',metrics=['accuracy'])
     model.fit(X, y, epochs=50, batch_size=100, verbose=1, validation_split=0.2)
     model.save("facial_keypoints_model.h5")
@@ -82,5 +82,5 @@ def train_facial_expressions(X,y):
     model.summary()
     model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     model.fit(X, y, epochs=50, batch_size=100, verbose=1, validation_split=0.2)
-    model.save("expressions_model.h5")
+    model.save("facial_expressions_model.h5")
 
